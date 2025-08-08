@@ -1,48 +1,38 @@
+/* eslint-disable comma-dangle */
 import { AuthenticationError } from "@/domain/models";
-class FacebookAuthenticationService {
-  constructor(
-    private readonly LoadFacebookUserByTokenApi: LoadFacebookUserByTokenApi
-  ) {}
+import { FacebookAuthenticationService } from "../src/data/contracts/services";
 
-  async perform(
-    params: LoadFacebookUserByTokenApi.Params
-  ): Promise<AuthenticationError> {
-    await this.LoadFacebookUserByTokenApi.loadUserByToken(params);
-    return new AuthenticationError();
-  }
-}
-interface LoadFacebookUserByTokenApi {
-  loadUserByToken: (
-    params: LoadFacebookUserByTokenApi.Params
-  ) => Promise<LoadFacebookUserByTokenApi.Result>;
-}
-namespace LoadFacebookUserByTokenApi {
-  export type Params = {
-    token: string;
-  };
-  export type Result = undefined;
-}
-class LoadFacebookUserApiSpy implements LoadFacebookUserByTokenApi {
-  token?: string;
-  result = undefined;
-  async loadUserByToken(
-    params: LoadFacebookUserByTokenApi.Params
-  ): Promise<LoadFacebookUserByTokenApi.Result> {
-    this.token = params.token;
-    return this.result;
-  }
-}
+// class LoadFacebookUserApiSpy implements LoadFacebookUserByTokenApi {
+//   calls?: number;
+//   token?: string;
+//   result = undefined;
+//   async loadUserByToken(
+//     params: LoadFacebookUserByTokenApi.Params
+//   ): Promise<LoadFacebookUserByTokenApi.Result> {
+//     this.token = params.token;
+//     this.calls = 0;
+//     return this.result;
+//   }
+// }
 describe("FacebookAuthentication", () => {
   it("", async () => {
-    const loadFacebookUserByTokenApi = new LoadFacebookUserApiSpy();
+    const loadFacebookUserByTokenApi = {
+      loadUserByToken: jest.fn(),
+    };
     const sut = new FacebookAuthenticationService(loadFacebookUserByTokenApi);
     await sut.perform({ token: "any_token" });
 
-    expect(loadFacebookUserByTokenApi.token).toBe("any_token");
+    expect(loadFacebookUserByTokenApi.loadUserByToken).toBeCalledWith({
+      token: "any_token",
+    });
+
+    expect(loadFacebookUserByTokenApi.loadUserByToken).toBeCalledTimes(1);
   });
   it("", async () => {
-    const loadFacebookUserByTokenApi = new LoadFacebookUserApiSpy();
-    loadFacebookUserByTokenApi.result = undefined;
+    const loadFacebookUserByTokenApi = {
+      loadUserByToken: jest.fn(),
+    };
+    loadFacebookUserByTokenApi.loadUserByToken.mockResolvedValueOnce(undefined);
     const sut = new FacebookAuthenticationService(loadFacebookUserByTokenApi);
     const authResult = await sut.perform({ token: "any_token" });
 
