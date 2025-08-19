@@ -1,25 +1,19 @@
 /* eslint-disable comma-dangle */
 import { AuthenticationError } from "@/domain/models";
-import { FacebookAuthenticationService } from "../src/data/contracts/services";
+import { LoadFacebookUserByTokenApi } from "@/data/contracts/apis/index";
 
-// class LoadFacebookUserApiSpy implements LoadFacebookUserByTokenApi {
-//   calls?: number;
-//   token?: string;
-//   result = undefined;
-//   async loadUserByToken(
-//     params: LoadFacebookUserByTokenApi.Params
-//   ): Promise<LoadFacebookUserByTokenApi.Result> {
-//     this.token = params.token;
-//     this.calls = 0;
-//     return this.result;
-//   }
-// }
-describe("FacebookAuthentication", () => {
-  it("", async () => {
-    const loadFacebookUserByTokenApi = {
-      loadUserByToken: jest.fn(),
-    };
-    const sut = new FacebookAuthenticationService(loadFacebookUserByTokenApi);
+import { FacebookAuthenticationService } from "@/data/contracts/services";
+import { mock, MockProxy } from "jest-mock-extended";
+
+describe("FacebookAuthentication Service", () => {
+  let loadFacebookUserByTokenApi: MockProxy<LoadFacebookUserByTokenApi>;
+  let sut: FacebookAuthenticationService;
+
+  beforeEach(() => {
+    loadFacebookUserByTokenApi = mock();
+    sut = new FacebookAuthenticationService(loadFacebookUserByTokenApi);
+  });
+  it("Should call FacebookApi with correct params", async () => {
     await sut.perform({ token: "any_token" });
 
     expect(loadFacebookUserByTokenApi.loadUserByToken).toBeCalledWith({
@@ -28,12 +22,9 @@ describe("FacebookAuthentication", () => {
 
     expect(loadFacebookUserByTokenApi.loadUserByToken).toBeCalledTimes(1);
   });
-  it("", async () => {
-    const loadFacebookUserByTokenApi = {
-      loadUserByToken: jest.fn(),
-    };
+  it("Should return AuthenticationError when FacebookApi returns undefined", async () => {
     loadFacebookUserByTokenApi.loadUserByToken.mockResolvedValueOnce(undefined);
-    const sut = new FacebookAuthenticationService(loadFacebookUserByTokenApi);
+
     const authResult = await sut.perform({ token: "any_token" });
 
     expect(authResult).toEqual(new AuthenticationError());
