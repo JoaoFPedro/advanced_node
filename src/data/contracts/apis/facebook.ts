@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/indent */
 export interface LoadFacebookUserByTokenApi {
   loadUserByToken: (
     params: LoadFacebookUserByTokenApi.Params
@@ -7,5 +8,11 @@ export namespace LoadFacebookUserByTokenApi {
   export type Params = {
     token: string;
   };
-  export type Result = undefined;
+  export type Result =
+    | undefined
+    | {
+        name: string;
+        facebookId: string;
+        email: string;
+      };
 }
