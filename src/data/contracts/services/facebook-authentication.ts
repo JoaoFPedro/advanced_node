@@ -1,16 +1,17 @@
+/* eslint-disable @typescript-eslint/indent */
 /* eslint-disable comma-dangle */
 import { AuthenticationError } from "@/domain/models";
 import { LoadFacebookUserByTokenApi } from "../apis/facebook";
 import {
-  CreateUserAccountRepository,
   LoadUserAccountRepository,
+  SaveUserAccountRepository,
 } from "../repos/user-account";
 
 export class FacebookAuthenticationService {
   constructor(
     private readonly LoadFacebookUserByTokenApi: LoadFacebookUserByTokenApi,
-    private readonly LoadFacebookUserAccountRepo: LoadUserAccountRepository,
-    private readonly CreateFacebookUserAccountRepo: CreateUserAccountRepository
+    private readonly LoadFacebookUserAccountRepo: LoadUserAccountRepository &
+      SaveUserAccountRepository
   ) {}
 
   async perform(
@@ -20,13 +21,18 @@ export class FacebookAuthenticationService {
       params
     );
     if (fbData !== undefined) {
-      await this.LoadFacebookUserAccountRepo.load({ email: fbData.email });
+      const accountData = await this.LoadFacebookUserAccountRepo.load({
+        email: fbData.email,
+      });
+      await this.LoadFacebookUserAccountRepo.saveWithFacebook({
+        name: accountData?.name ?? fbData.name,
+        facebookId: fbData.facebookId,
+        id: accountData?.id,
+        email: fbData.email,
+      });
+
+      // await this.LoadFacebookUserAccountRepo.saveWithFacebook(fbData);
     }
-    await this.CreateFacebookUserAccountRepo.createFromFacebook({
-      email: "any_email",
-      name: "any_name",
-      facebookId: "any_facebookId",
-    });
 
     return new AuthenticationError();
   }
