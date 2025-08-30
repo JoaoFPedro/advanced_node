@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/indent */
 /* eslint-disable comma-dangle */
-import { AuthenticationError } from "@/domain/models";
+import { AuthenticationError, FacebookAccount } from "@/domain/models";
 import { LoadFacebookUserByTokenApi } from "../apis/facebook";
 import {
   LoadUserAccountRepository,
@@ -24,14 +24,8 @@ export class FacebookAuthenticationService {
       const accountData = await this.LoadFacebookUserAccountRepo.load({
         email: fbData.email,
       });
-      await this.LoadFacebookUserAccountRepo.saveWithFacebook({
-        name: accountData?.name ?? fbData.name,
-        facebookId: fbData.facebookId,
-        id: accountData?.id,
-        email: fbData.email,
-      });
-
-      // await this.LoadFacebookUserAccountRepo.saveWithFacebook(fbData);
+      const fbAccount = new FacebookAccount(fbData, accountData);
+      await this.LoadFacebookUserAccountRepo.saveWithFacebook(fbAccount);
     }
 
     return new AuthenticationError();
