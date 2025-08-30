@@ -11,8 +11,12 @@ export class FacebookAuthenticationService {
   async perform(
     params: LoadFacebookUserByTokenApi.Params
   ): Promise<AuthenticationError> {
-    await this.LoadFacebookUserByTokenApi.loadUserByToken(params);
-    await this.LoadFacebookUserAccountRepo.load({ email: "any_email" });
+    const fbData = await this.LoadFacebookUserByTokenApi.loadUserByToken(
+      params
+    );
+    if (fbData !== undefined) {
+      await this.LoadFacebookUserAccountRepo.load({ email: fbData.email });
+    }
 
     return new AuthenticationError();
   }
